@@ -1,0 +1,50 @@
+# Adapteted from: https://github.com/orgs/community/discussions/22183
+name: on-template-creation
+run-name: First time setup on template creation
+
+on:
+  # Run when repo created from template
+  create:
+
+# Only keep the latest run 
+# of this workflow
+concurrency:
+  group: on-template-creation
+  cancel-in-progress: true
+
+jobs:
+  on-template-creation:
+    # Ensure run only once,
+    # when repo generated
+    if: github.run_number == 1
+    runs-on: ubuntu-latest
+
+    steps:
+      # Clone repo contents
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Update README.md with 
+      # the project
+      - name: Update readme with project name
+        run: |
+          # Get repository name, ie
+          # the project name 
+          repo_name="$(basename ${{ github.repository }})"
+          # Update README.md with 
+          # the project name
+          sed -i "s/IC-123/${repo_name}/g" README.md
+
+      # Clean-up, delete any 
+      # unneeded files
+      - name: Remove unneeded files
+        run: |
+          # Delete this file
+          rm -f .github/workflows/on-template-creation.yml
+
+
+      # save changed files
+      - name: Commit changed files
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Setup repo"
